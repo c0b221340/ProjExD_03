@@ -51,7 +51,7 @@ class Bird:
         self.img_flip = pg.transform.flip(self.img, True, False)  # self.imgを左右反転
 
         self.imgs = {
-        (0,0): pg.transform.rotozoom(self.img_flip, 0,1.0),
+        (0,0): pg.transform.rotozoom(self.img, 0,1.0),
         (0, -5): pg.transform.rotozoom(self.img, 90,1.0),
         (5, -5): pg.transform.rotozoom(self.img, 45,1.0),
         (5, 0): pg.transform.rotozoom(self.img, 0,1.0),
@@ -137,6 +137,7 @@ class Beam:
         引数2 xy：こうかとん画像の位置座標タプル
         """
         self.img = pg.image.load(f"ex03/fig/beam.png")
+        self.img = pg.transform.rotozoom(self.img, 0, 2.0)
         self.rct = self.img.get_rect()
         self.rct.left = bird.rct.right
         self.rct.centery = bird.rct.centery
@@ -150,7 +151,53 @@ class Beam:
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
 
+class Explosion:
+    """
+    爆発に関するクラス
+    """
+    def __init__(self, bomb: Bomb):
+        """
+        爆発画像Surfaceを生成する
+        引数1 bomb：爆発する爆弾のインスタンス
+        """
+        self.img = pg.image.load(f"ex03/fig/explosion.gif")
+        self.img = pg.transform.rotozoom(self.img, 0, 2.0)
+        self.imgs = [pg.transform.flip(self.img, True, False),pg.transform.flip(self.img, True, True),pg.transform.flip(self.img, False, True),pg.transform.flip(self.img, False, False)]
+        self.rct = self.img.get_rect()
+        self.rct.center = bomb.rct.center
+        self.life = 100
 
+
+    def update(self, screen: pg.Surface):
+        """
+        爆発画像をアニメーションさせる
+        """
+        self.life -= 1
+        self.img = self.imgs[self.life % 4]
+        screen.blit(self.img, self.rct)
+        
+class Score:
+
+    """
+    スコアに関するクラス
+    """
+    def __init__(self):
+        """
+        スコアを0に初期化する
+        """
+        self.score = 0
+        self.font = pg.font.SysFont("hgp創英角ポップ体", 30)
+        self.color = (0, 0, 255)
+        self.img = self.font.render(f"SCORE:{self.score}", 0, self.color)
+        self.rct = self.img.get_rect()
+        self.rct.center = (100, HEIGHT-50)
+
+    def update(self, screen: pg.Surface):
+        """
+        スコアを更新する
+        """
+        self.img = self.font.render(f"SCORE:{self.score}", 0, self.color)
+        screen.blit(self.img, self.rct)
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -158,7 +205,10 @@ def main():
     bg_img = pg.image.load("ex03/fig/pg_bg.jpg")
     bird = Bird(3, (900, 400))
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS+1)]
+    ex_bombs = []
     beam = None
+    score = Score()
+
 
     clock = pg.time.Clock()
     tmr = 0
@@ -188,17 +238,26 @@ def main():
                         bombs[i] = None
                         beam = None
                         bird.change_img(6, screen)
-        
+                        Explosion(bomb).update(screen)
+                        ex_bombs.append(Explosion(bomb))
+                        score.score += 1
+                
+                        
+                        pg.display.update()
 
+        
 
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         
+        bombs = [bomb for bomb in bombs if bomb is not None]
+        ex_bombs = [ex_bomb for ex_bomb in ex_bombs if ex_bomb.life > 0]
         if bomb is not None:
             bomb.update(screen)
         if beam is not None:
             beam.update(screen)
+        score.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
