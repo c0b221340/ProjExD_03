@@ -174,6 +174,7 @@ def main():
                 # 爆弾とビームが衝突したら，爆弾を消去する
                 bomb = None
                 beam = None
+                bird.change_img(6, screen)
         
         if bomb is not None:
             bomb.update(screen)
