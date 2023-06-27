@@ -61,12 +61,9 @@ class Bird:
         (-5, 0): pg.transform.rotozoom(self.img_flip, 0,1.0),
         (-5, -5): pg.transform.rotozoom(self.img_flip, -45,1.0),
         }
-
-
         self.img = self.imgs[(5, 0)] # デフォルト画像
         self.rct = self.img.get_rect()
         self.rct.center = xy
-
     def change_img(self, num: int, screen: pg.Surface):
         """
         こうかとん画像を切り替え，画面に転送する
@@ -91,7 +88,6 @@ class Bird:
         if check_bound(self.rct) != (True, True):
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(self.imgs[tuple(sum_mv)], self.rct)
-
 
 class Bomb:
     """
@@ -233,9 +229,6 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beam = Beam(bird)   # ビームクラスのインスタンスを生成する
-
-
-
         
         screen.blit(bg_img, [0, 0])
         for i,bomb in enumerate(bombs):
