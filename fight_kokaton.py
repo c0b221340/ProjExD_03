@@ -48,6 +48,22 @@ class Bird:
             True, 
             False
         )
+        self.img_flip = pg.transform.flip(self.img, True, False)  # self.imgを左右反転
+
+        self.imgs = {
+        (0,0): pg.transform.rotozoom(self.img_flip, 0,1.0),
+        (0, -5): pg.transform.rotozoom(self.img, 90,1.0),
+        (5, -5): pg.transform.rotozoom(self.img, 45,1.0),
+        (5, 0): pg.transform.rotozoom(self.img, 0,1.0),
+        (5, 5): pg.transform.rotozoom(self.img, -45,1.0),
+        (0, 5): pg.transform.rotozoom(self.img, -90,1.0),
+        (-5, +5): pg.transform.rotozoom(self.img_flip, 45,1.0),
+        (-5, 0): pg.transform.rotozoom(self.img_flip, 0,1.0),
+        (-5, -5): pg.transform.rotozoom(self.img_flip, -45,1.0),
+        }
+
+
+        self.img = self.imgs[(5, 0)] # デフォルト画像
         self.rct = self.img.get_rect()
         self.rct.center = xy
 
@@ -74,7 +90,7 @@ class Bird:
         self.rct.move_ip(sum_mv)
         if check_bound(self.rct) != (True, True):
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
-        screen.blit(self.img, self.rct)
+        screen.blit(self.imgs[tuple(sum_mv)], self.rct)
 
 
 class Bomb:
