@@ -199,6 +199,21 @@ class Score:
         self.img = self.font.render(f"SCORE:{self.score}", 0, self.color)
         screen.blit(self.img, self.rct)
 
+class Limit:
+    def __init__(self):
+        self.limit = 10000000000
+        self.font = pg.font.SysFont("hgp創英角ポップ体", 30)
+        self.color = (255, 0, 0)
+        self.img = self.font.render(f"LIMIT:{self.limit}", 0, self.color)
+        self.rct = self.img.get_rect()
+        self.rct.center = (100, HEIGHT-100)
+
+    def update(self, screen: pg.Surface):
+        # 制限時間を更新する
+        self.img = self.font.render(f"LIMIT:{self.limit}", 0, self.color)
+        screen.blit(self.img, self.rct)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -208,7 +223,7 @@ def main():
     ex_bombs = []
     beam = None
     score = Score()
-
+    limit = Limit()
 
     clock = pg.time.Clock()
     tmr = 0
@@ -232,6 +247,12 @@ def main():
                     pg.display.update()
                     time.sleep(1)
                     return
+                if limit.limit == 0:
+                    # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
+                    bird.change_img(8, screen)
+                    pg.display.update()
+                    time.sleep(1)
+                    return
                 if beam is not None:
                     if bomb.rct.colliderect(beam.rct):
                         # 爆弾とビームが衝突したら，爆弾を消去する
@@ -241,10 +262,9 @@ def main():
                         Explosion(bomb).update(screen)
                         ex_bombs.append(Explosion(bomb))
                         score.score += 1
-                
+        
                         
                         pg.display.update()
-
         
 
 
@@ -257,9 +277,13 @@ def main():
             bomb.update(screen)
         if beam is not None:
             beam.update(screen)
+        second = tmr // 50
+        limit.limit -= second
         score.update(screen)
+        limit.update(screen)
         pg.display.update()
         tmr += 1
+        
         clock.tick(50)
 
 
